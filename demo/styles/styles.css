@@ -1,0 +1,12 @@
+.color {
+    display: inline-block;
+    position: absolute;
+    width: 10px;
+    height: 10px;
+}
+
+.target {
+    margin-top: 15px;
+    width: 200px;
+    height: 200px;
+}
