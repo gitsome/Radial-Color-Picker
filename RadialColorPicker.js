@@ -29,21 +29,34 @@ var RadialColorPicker;
         // build the shapes
         var shapes = [];
         var arc = Radial.shapes.arc({cornerRadius: 0});
-        for(var i=0; i < options.colors.length; i++) {
-            shapes.push({
-                id: i,
-                path: arc,
-                color: options.colors[i],
-                stroke: '#fff',
-                strokeWidth: 5,
-                angle: 0,
-                arcLength: 0,
-                inner: 0.5,
-                outer: 1.0
-            })
-        }
 
-        // load the initial transforms
+        var addColorLevel = function (colors, level, totalLevels) {
+            levelCounts[level] = colors.length;
+            for(var i=0; i < colors.length; i++) {
+                shapes.push({
+                    id: level + '-' + i,
+                    path: arc,
+                    group: level,
+                    groupIndex: i,
+                    color: colors[i],
+                    stroke: '#fff',
+                    strokeWidth: 5,
+                    angle: 0,
+                    arcLength: 0,
+                    inner: (level/totalLevels)* 0.7 + 0.3,
+                    outer: ((level + 1)/totalLevels)* 0.7 + 0.3
+                });
+            }
+        };
+
+        var levelCounts = {};
+        if(typeof options.colors[0] === 'string') {
+            addColorLevel(options.colors, 0, 1);
+        } else {
+            for(var j=0; j < options.colors.length; j++) {
+                addColorLevel(options.colors[j], j, options.colors.length);
+            }
+        }
 
         // start the workflow
         var radial = new Radial(options.container, shapes, {});
@@ -53,16 +66,19 @@ var RadialColorPicker;
                 {type: 'custom', configs: {
                     custom: function () {
                         return {
-                            arcLength: (360 / options.colors.length),
+                            arcLength: function (d, i) {
+                                return (360 / levelCounts[d.group]);
+                            },
                             angle: function (d, i) {
-                                return i * (360 / options.colors.length);
+                                console.log("group index:", d.groupIndex);
+                                return d.groupIndex * (360 / levelCounts[d.group]);
                             }
                         };
                     }
                 }},
             ],
             delay: Radial.DELAY_BY_INDEX,
-            speed: 300
+            speed: 400
         }]);
 
     };
