@@ -34,7 +34,7 @@
         <script src="../lib/Radial/shapes/halfCircleIn.d3.js"></script>
         <script src="../lib/Radial/shapes/circle.d3.js"></script>
 
-        <!-- radial color picker script -->
+        <!-- husl color space library for picker colors with the same percieved brightness -->
         <script src="../lib/husl/husl.min.js"></script>
 
         <!-- radial color picker script -->
@@ -72,9 +72,12 @@
 
         <div class="container">
             <div class="row">
-                <div class="col-xs-12">
-                    <button class="btn btn-primary">Choose Color</button>
+                <div class="col-xs-3">
+                    <button class="btn btn-primary single-color-set">Choose Color</button>
                     <div class="target target1"></div>
+                </div>
+                <div class="col-xs-3">
+                    <button class="btn btn-primary double-color-set">Choose Color</button>
                     <div class="target target2"></div>
                 </div>
             </div>

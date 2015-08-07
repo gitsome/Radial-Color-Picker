@@ -7,6 +7,16 @@
 
 .target {
     margin-top: 15px;
-    width: 200px;
-    height: 200px;
+    width: 250px;
+    height: 250px;
+}
+
+.radial-color-picker {
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+}
+
+.radial-color-picker .shape {
+    cursor: pointer;
 }
