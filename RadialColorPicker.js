@@ -8,7 +8,8 @@ var RadialColorPicker;
     var options_default = {
         selectedColor: false, // (optional) the selected color coming in if there is one
         container: false, // the element where we should inject
-        colors: []
+        colors: [],
+        colorSelected: $.noop
     };
 
     RadialColorPicker = function (options_in) {
@@ -24,7 +25,7 @@ var RadialColorPicker;
         /*============ INITIALIZATION ============*/
 
         // build the template
-        var $picker = $('<span class="radial-color-picker"></span>');
+        var $picker = $('<span class="radial-color-picker" style="width:100%; height: 100%; display: inline-block;"></span>');
 
         // append the template
         options.container.html('').append($picker);
@@ -37,10 +38,12 @@ var RadialColorPicker;
             levelCounts[level] = colors.length;
             for(var i=0; i < colors.length; i++) {
 
-                var inner = level === totalLevels - 1 ? (level/totalLevels) * 0.7 + 0.3 : 1 * 0.7 + 0.3;
-                var outer = level === totalLevels - 1 ? ((level + 1)/totalLevels) * 0.7 + 0.3 : 1 * 0.7 + 0.3;
-                var angle = level === totalLevels - 1 ? 0 : i * (360 / colors.length);
-                var arcLength = level === totalLevels - 1 ? 0 : (360 / colors.length);
+                var isOuterLevel = level === totalLevels - 1;
+
+                var inner       = 0.0;
+                var outer       = 0.0;
+                var angle       = i * (360 / colors.length);
+                var arcLength   = (360 / colors.length);
 
                 shapes.push({
                     id: level + '-' + i,
@@ -79,18 +82,27 @@ var RadialColorPicker;
         // start the workflow
         var radial = new Radial($picker, shapes, {
             padding: 10,
-            click: function (d, shape) {
-                console.log("click:", d);
+            mousedown: function (d, shape) {
+                var color = $.husl.fromHex(d.color);
+                var newColor = $.husl.toHex(color[0], (100 - color[1]) * 0.25 + color[1], (100 - color[2]) * 0.25 + color[2]);
+                d3.select(shape).style('fill', newColor);
+            },
+            mouseup: function (d, shape) {
+                d3.select(shape).style('fill', d.color);
             },
             mouseover: function (d, shape) {
                 var color = $.husl.fromHex(d.color);
-                var newColor = $.husl.toHex(color[0], color[1] * 0.5, 0.6 * color[2]);
+                var newColor = $.husl.toHex(color[0], color[1] * 0.4, 0.4 * color[2]);
 
                 shape.parentNode.parentNode.appendChild(shape.parentNode);
                 d3.select(shape).style('stroke', newColor);
             },
             mouseout: function (d, shape) {
                 d3.select(shape).style('stroke', d.stroke);
+                d3.select(shape).style('fill', d.color);
+            },
+            click: function (d, shape) {
+                options.colorSelected(d.color);
             }
         });
 
@@ -120,25 +132,7 @@ var RadialColorPicker;
             radial.transform([
                 {
                     transforms:[
-                        {type: 'custom', groups: outerGroups, configs: {
-                            custom: function () {
-                                return {
-                                    arcLength: function (d, i) {
-                                        return (360 / levelCounts[d.group]);
-                                    },
-                                    angle: function (d, i) {
-                                        return d.groupIndex * (360 / levelCounts[d.group]);
-                                    }
-                                };
-                            }
-                        }},
-                    ],
-                    delay: 0,
-                    speed: 300
-                },
-                {
-                    transforms:[
-                        {type: 'custom', groups: innerGroups, configs: {
+                        {type: 'custom', configs: {
                             custom: function () {
                                 return {
                                     inner: function (d, i) {
@@ -149,7 +143,7 @@ var RadialColorPicker;
                                     }
                                 };
                             }
-                        }}
+                        }},
                     ],
                     delay: 0,
                     speed: 300
